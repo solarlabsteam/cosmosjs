@@ -40,21 +40,21 @@ export class Cosmos {
 		    throw new Error("mnemonic expects a string")
 		}
 		if (checkSum) {
-			if (!bip39.default.validateMnemonic(mnemonic)) throw new Error("mnemonic phrases have invalid checksums");
+			if (!bip39.validateMnemonic(mnemonic)) throw new Error("mnemonic phrases have invalid checksums");
 		}
-		const seed = bip39.default.mnemonicToSeed(mnemonic);
-		const node = bip32.default.fromSeed(seed)
+		const seed = bip39.mnemonicToSeed(mnemonic);
+		const node = bip32.fromSeed(seed)
 		const child = node.derivePath(this.path)
-		const words = bech32.default.toWords(child.identifier);
-		return bech32.default.encode(this.bech32MainPrefix, words);
+		const words = bech32.toWords(child.identifier);
+		return bech32.encode(this.bech32MainPrefix, words);
 	}
 
 	getECPairPriv(mnemonic) {
 		if (typeof mnemonic !== "string") {
 		    throw new Error("mnemonic expects a string")
 		}
-		const seed = bip39.default.mnemonicToSeed(mnemonic);
-		const node = bip32.default.fromSeed(seed);
+		const seed = bip39.mnemonicToSeed(mnemonic);
+		const node = bip32.fromSeed(seed);
 		const child = node.derivePath(this.path);
 		return child.privateKey;
 	}
@@ -76,7 +76,7 @@ export class Cosmos {
 		});
 		return pubKeyAny;
 	}
-	
+
 	getAccounts(address) {
 		let accountsApi = "/cosmos/auth/v1beta1/accounts/";
 		return fetch(this.url + accountsApi + address).then(response => response.json())
@@ -108,13 +108,13 @@ export class Cosmos {
 	broadcast(signedTxBytes, broadCastMode = "BROADCAST_MODE_SYNC") {
 		const txBytesBase64 = Buffer.from(signedTxBytes, 'binary').toString('base64');
 
-		var options = { 
+		var options = {
 			method: 'POST',
 			url: this.url + '/cosmos/tx/v1beta1/txs',
-			headers: 
+			headers:
 			{ 'Content-Type': 'application/json' },
 			body: { tx_bytes: txBytesBase64, mode: broadCastMode },
-			json: true 
+			json: true
 		};
 
 		return new Promise(function(resolve, reject){
